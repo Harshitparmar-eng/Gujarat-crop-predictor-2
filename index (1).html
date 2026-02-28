@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gujarat Smart Crop Yield Predictor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 450px;
+            margin: auto;
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.3);
+        }
+
+        input, select {
+            width: 95%;
+            padding: 8px;
+            margin: 6px 0;
+            border-radius: 5px;
+            border: 1px solid gray;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #11998e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0d7f73;
+        }
+
+        #output {
+            margin-top: 20px;
+            text-align: left;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🌾 Gujarat Smart Crop Predictor 🌾</h1>
+
+<div class="container">
+
+    <label>District (All Gujarat)</label>
+    <select id="district">
+        <option>Ahmedabad</option>
+        <option>Surat</option>
+        <option>Vadodara</option>
+        <option>Rajkot</option>
+        <option>Bhavnagar</option>
+        <option>Jamnagar</option>
+        <option>Junagadh</option>
+        <option>Gandhinagar</option>
+        <option>Kutch</option>
+        <option>All Gujarat</option>
+    </select>
+
+    <label>Crop Type</label>
+    <select id="crop">
+        <option>Wheat</option>
+        <option>Rice</option>
+        <option>Cotton</option>
+        <option>Bajra</option>
+        <option>Sugarcane</option>
+        <option>Groundnut</option>
+        <option>Maize</option>
+        <option>Tur Dal</option>
+        <option>Chana</option>
+        <option>Mustard</option>
+    </select>
+
+    <label>Area (hectares)</label>
+    <input type="number" id="area" required>
+
+    <label>Rainfall (mm)</label>
+    <input type="number" id="rain" required>
+
+    <label>Soil Type</label>
+    <select id="soil">
+        <option>Sandy</option>
+        <option>Clay</option>
+        <option>Black</option>
+        <option>Loamy</option>
+    </select>
+
+    <label>Soil pH</label>
+    <input type="number" id="ph" step="0.1" required>
+
+    <label>Temperature (°C)</label>
+    <input type="number" id="temp" required>
+
+    <label>Humidity (%)</label>
+    <input type="number" id="humidity" required>
+
+    <button onclick="predict()">Predict Yield</button>
+
+    <div id="output"></div>
+
+</div>
+
+<script>
+function predict() {
+
+    let district = document.getElementById("district").value;
+    let crop = document.getElementById("crop").value;
+    let area = parseFloat(document.getElementById("area").value);
+    let rain = parseFloat(document.getElementById("rain").value);
+    let soilType = document.getElementById("soil").value;
+    let ph = parseFloat(document.getElementById("ph").value);
+    let temp = parseFloat(document.getElementById("temp").value);
+    let humidity = parseFloat(document.getElementById("humidity").value);
+
+    if (!area || !rain || !ph || !temp || !humidity) {
+        alert("Please fill all fields properly!");
+        return;
+    }
+
+    let baseYield = {
+        "Wheat":3,
+        "Rice":4,
+        "Cotton":2.5,
+        "Bajra":2,
+        "Sugarcane":6,
+        "Groundnut":2.2,
+        "Maize":3.5,
+        "Tur Dal":1.8,
+        "Chana":2,
+        "Mustard":2.3
+    };
+
+    let rainFactor = rain / 1000;
+    let phFactor = (7 - Math.abs(7 - ph)) / 7;
+    let humidityFactor = humidity / 100;
+
+    let totalYield = area * baseYield[crop] * rainFactor * phFactor;
+
+    // Suggestions
+    let rainAdvice = rain < 500 ? 
+    "Low rainfall – Install drip irrigation." :
+    "Rainfall level is suitable.";
+
+    let soilAdvice =
+        soilType == "Sandy" ? "Add compost to improve water retention." :
+        soilType == "Clay" ? "Ensure proper drainage system." :
+        soilType == "Black" ? "Very good soil for cotton & wheat." :
+        "Balanced soil condition.";
+
+    let waterNeed =
+        crop == "Sugarcane" ? "High water requirement." :
+        crop == "Bajra" ? "Low water requirement." :
+        "Moderate water requirement.";
+
+    let pestRisk =
+        humidity > 80 ? "High pest risk – Do regular inspection." :
+        "Low pest risk.";
+
+    let loanAdvice =
+        area > 5 ? "Eligible for agriculture loan schemes." :
+        "Can apply for small farmer subsidy schemes.";
+
+    let score = Math.round((rainFactor + phFactor + humidityFactor) * 20);
+
+    document.getElementById("output").innerHTML =
+        "<h2>🌟 Prediction Result</h2>" +
+        "<b>District:</b> " + district + "<br>" +
+        "<b>Crop:</b> " + crop + "<br><br>" +
+        "<b>Estimated Yield:</b> " + totalYield.toFixed(2) + " tons<br><br>" +
+        "<b>🌧 Rain Advice:</b> " + rainAdvice + "<br>" +
+        "<b>🌱 Soil Advice:</b> " + soilAdvice + "<br>" +
+        "<b>💧 Water Requirement:</b> " + waterNeed + "<br>" +
+        "<b>🐛 Pest Risk:</b> " + pestRisk + "<br>" +
+        "<b>💰 Loan Suggestion:</b> " + loanAdvice + "<br><br>" +
+        "<b>⭐ AI Farming Score:</b> " + score + " / 100";
+}
+</script>
+
+</body>
+</html>
